@@ -636,8 +636,8 @@ void Binary::dump() const {
     printf("\t%s = {\n"
            "\t\ttype : %d\n"
            "\t\taddr : " ADDRFMT "\n"
-           "\t\tfoff : " ADDRFMT "\n"
-           "\t\tsize : " ADDRFMT "\n"
+           "\t\tfoff : %lx\n"
+           "\t\tsize : %lx\n"
            "\t}\n",
            sect.name.data(), sect.type, sect.addr, sect.foff, sect.size);
   }

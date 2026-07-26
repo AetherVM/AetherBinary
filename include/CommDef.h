@@ -15,13 +15,9 @@
 #define __AETHER_API__ __attribute__((visibility("default")))
 #endif // end of _WIN32
 
-#if __APPLE__ || __linux__
-typedef unsigned long addr_t;
-#define ADDRFMT "%lx"
-#else
 typedef unsigned long long addr_t;
+
 #define ADDRFMT "%llx"
-#endif
 
 #define AETHER_ANOYPREFIX "aebi_"
 
