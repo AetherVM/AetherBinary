@@ -733,8 +733,10 @@ void Binary::dump(addr_t start, addr_t end) const {
   }
 }
 
-const char *Binary::arch(bool thumb) const {
-  switch (m_archtype) {
+const char *Binary::arch(bool thumb) const { return arch(m_archtype, thumb); }
+
+const char *Binary::arch(ArchType arch, bool thumb) {
+  switch (arch) {
   case ARM64:
     return "aarch64";
   case X86_64:

@@ -44,6 +44,7 @@ public:
   void dump(addr_t start, addr_t end = 0) const;
   const char *triple(bool thumb = false) const;
   const char *arch(bool thumb = false) const;
+  static const char *arch(ArchType arch, bool thumb = false);
 
   void holdBuffer(void *llvmbin, void *filebuff);
 
