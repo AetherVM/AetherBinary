@@ -2697,13 +2697,27 @@ Binary *New(const char *path, const char *triple, bool analyze) {
     }
     return anybin();
   }
+  return New(std::move(errOrBuff.get()), analyze);
+}
 
+Binary *New(std::string_view objbuf, std::string_view name, bool analyze) {
+  return New(MemoryBuffer::getMemBufferCopy(objbuf, name), analyze);
+}
+
+Binary *New(std::unique_ptr<MemoryBuffer> buff, bool analyze) {
+  auto anybin = [&buff]() {
+    Binary *result = new AnyBinary;
+    // no need to hold analyzed buffer
+    result->holdBuffer(nullptr, buff.release());
+    result->analyze(nullptr);
+    return result;
+  };
   MemoryBufferRef buffref(*buff);
   auto errOrBin = object::createBinary(buffref);
   if (!errOrBin) {
     return anybin();
   }
-  switch (magic) {
+  switch (identify_magic(buff->getBuffer())) {
   case file_magic::macho_object:
   case file_magic::macho_executable:
   case file_magic::macho_dynamically_linked_shared_lib:
@@ -2712,16 +2726,15 @@ Binary *New(const char *path, const char *triple, bool analyze) {
   case file_magic::macho_dynamically_linked_shared_lib_stub:
   case file_magic::macho_dynamic_linker:
   case file_magic::macho_preload_executable:
-    return NewMachO(errOrBin.get().release(), errOrBuff.get().release(),
-                    analyze);
+    return NewMachO(errOrBin.get().release(), buff.release(), analyze);
   case file_magic::coff_object:
   case file_magic::pecoff_executable:
   case file_magic::coff_import_library:
-    return NewPE(errOrBin.get().release(), errOrBuff.get().release(), analyze);
+    return NewPE(errOrBin.get().release(), buff.release(), analyze);
   case file_magic::elf_relocatable:
   case file_magic::elf_executable:
   case file_magic::elf_shared_object:
-    return NewELF(errOrBin.get().release(), errOrBuff.get().release(), analyze);
+    return NewELF(errOrBin.get().release(), buff.release(), analyze);
   default:
     return anybin();
   }

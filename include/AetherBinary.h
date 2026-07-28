@@ -6,6 +6,7 @@
 #pragma once
 
 #include <assert.h>
+#include <memory>
 #include <string.h>
 
 #include "AetherArch.h"
@@ -152,6 +153,11 @@ protected:
 __AETHER_API__ void setAnalyzeCallback(analyze_log_t log,
                                        analyze_progress_t prog);
 __AETHER_API__ Binary *New(const char *path, const char *triple = nullptr,
+                           bool analyze = true);
+__AETHER_API__ Binary *New(std::string_view objbuf,
+                           std::string_view name = "memory-object",
+                           bool analyze = true);
+__AETHER_API__ Binary *New(std::unique_ptr<llvm::MemoryBuffer> buff,
                            bool analyze = true);
 __AETHER_API__ void Delete(Binary *bin);
 
