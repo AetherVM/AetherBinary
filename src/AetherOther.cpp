@@ -6,8 +6,19 @@
 #include "AetherOther.h"
 #include "AetherCommop.h"
 
-#include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Object/ObjectFile.h>
+#include <llvm/Support/MemoryBuffer.h>
+
+namespace llvm {
+void initDebugCounterOptions() {}
+void initGraphWriterOptions() {}
+void initSignalsOptions() {}
+void initStatisticOptions() {}
+void initTimerOptions() {}
+void initWithColorOptions() {}
+void initDebugOptions() {}
+void initRandomSeedOptions() {}
+} // namespace llvm
 
 using namespace llvm;
 
@@ -54,7 +65,8 @@ bool AebiBinary::analyze(const void *llvmbin) {
   }
   int prog = 1, progtmp;
   char progprefix[128];
-  snprintf(progprefix, sizeof(progprefix), AETHER_LIB_NAME " is loading analyzed functions");
+  snprintf(progprefix, sizeof(progprefix),
+           AETHER_LIB_NAME " is loading analyzed functions");
   // function
   for (int i = 0; i < (int)mfhdr->nfunc; i++) {
     analyze_progress(progprefix, prog++, (int)mfhdr->nfunc, progtmp);

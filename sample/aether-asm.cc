@@ -38,7 +38,8 @@ int main(int argc, const char *argv[]) {
   }
   // load LLVM and AetherBinary libraries, so we can use their APIs directly
   // within ICPP runtime environment.
-  load_libraries(argv[0]);
+  if (!load_libraries(argv[0]))
+    return -1;
 
   aether::Disassembler diser(argv[1]);
   if (!diser.ready()) {
