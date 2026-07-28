@@ -350,6 +350,10 @@ public:
   }
 };
 
+extern const llvm::Target *diser_getTarget(void *ctx) {
+  return ((DisassemblerContext *)ctx)->Target;
+}
+
 extern MCRegisterInfo *diser_getMCRegInfo(void *ctx) {
   return ((DisassemblerContext *)ctx)->MRI;
 }

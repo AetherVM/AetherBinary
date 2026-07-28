@@ -200,26 +200,6 @@ static cl::opt<ActionType> Action(
                clEnumValN(AC_MDisassemble, "mdis",
                           "Marked up disassembly of strings of hex bytes")));
 
-static const Target *GetTarget(const char *ProgName) {
-  // Figure out the target triple.
-  if (TripleName.empty())
-    TripleName = sys::getDefaultTargetTriple();
-  Triple TheTriple(Triple::normalize(TripleName));
-
-  // Get the target specific parser.
-  std::string Error;
-  const Target *TheTarget =
-      TargetRegistry::lookupTarget(ArchName, TheTriple, Error);
-  if (!TheTarget) {
-    WithColor::error(errs(), ProgName) << Error;
-    return nullptr;
-  }
-
-  // Update the triple name and return the found target.
-  TripleName = TheTriple.getTriple();
-  return TheTarget;
-}
-
 static std::unique_ptr<ToolOutputFile>
 GetOutputStream(StringRef Path, sys::fs::OpenFlags Flags) {
   std::error_code EC;
@@ -287,6 +267,7 @@ static int fillCommandLineSymbols(MCAsmParser &Parser) {
 }
 
 namespace aether {
+extern const llvm::Target *diser_getTarget(void *ctx);
 extern MCRegisterInfo *diser_getMCRegInfo(void *ctx);
 extern MCAsmInfo *diser_createMCAsmInfo(void *ctx);
 extern MCInstrInfo *diser_createMCInstrInfo(void *ctx);
@@ -297,6 +278,7 @@ extern MCStreamer *diser_createAsmStreamer(void *ctx);
 
 using namespace aether;
 
+#define GetTarget(...) diser_getTarget(ctx)
 #define TheTarget_createMCRegInfo(...) diser_getMCRegInfo(ctx)
 #define TheTarget_createMCAsmInfo(...) diser_createMCAsmInfo(ctx)
 #define TheTarget_createMCInstrInfo(...) diser_createMCInstrInfo(ctx)
