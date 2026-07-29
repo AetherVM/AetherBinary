@@ -1089,7 +1089,8 @@ bool Binary::analyze(const void *llvmbin) {
   if (!m_funcs.size()) {
     // the start of TEXT section should be a function start anyway
     for (auto &sect : m_sects) {
-      if (sect.second.type == TEXT && sect.second.addr != imageBase()) {
+      if (sect.second.type == TEXT &&
+          (objbase->isRelocatableObject() || sect.second.addr != imageBase())) {
         auto start = sect.second.addr;
         auto &newfunc =
             m_funcs.insert(std::make_pair(start, Function())).first->second;
