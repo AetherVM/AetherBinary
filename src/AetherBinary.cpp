@@ -2480,10 +2480,19 @@ Binary::matchTemplate(const std::vector<const char *> *insns, int count,
   return rvas;
 }
 
-uint32_t Binary::genBranchOpcode(uint64_t from, uint64_t to, bool call) {
+uint32_t Binary::genBranchOpcode(addr_t from, addr_t to, bool call) {
   uint32_t opcode;
   branch_a64(call ? opc_arm64_bl : opc_arm64_b, from, to, (char *)&opcode);
   return opcode;
+}
+
+void Binary::patchCallOffset(char *opcptr, addr_t from, addr_t to) {
+  // from: call/jmp to
+  // to = from + 5 + offset
+  // offset = to - (from + 5)
+  auto offset = (int)((int64_t)to - (int64_t)(from + 5));
+  auto offptr = opcptr + 1;
+  *reinterpret_cast<int *>(offptr) = offset;
 }
 
 static Binary *NewMachO(object::Binary *llvmbin, MemoryBuffer *buff,

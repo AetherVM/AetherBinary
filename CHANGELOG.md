@@ -9,6 +9,7 @@
  * add new binary from memory object apis;
  * add the start of text section of relocatable object to function list;
  * add syscall category in InsnType;
+ * add x86_64 pc-relative call and jump opcode patch;
 
 ## v0.1.0
 Initial release.

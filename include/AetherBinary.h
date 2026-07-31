@@ -105,7 +105,10 @@ public:
   std::vector<std::set<int>>
   matchTemplate(const std::vector<const char *> *insns, int count,
                 std::string &err);
-  uint32_t genBranchOpcode(uint64_t from, uint64_t to, bool call = false);
+  // for arm64
+  uint32_t genBranchOpcode(addr_t from, addr_t to, bool call = false);
+  // for x86
+  void patchCallOffset(char *opcptr, addr_t from, addr_t to);
   void interateSymbols(void (*callback)(void *ctx, const char *name,
                                         addr_t addr),
                        void *ctx);
