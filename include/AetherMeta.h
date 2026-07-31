@@ -50,6 +50,7 @@ enum InsnType {
   CALL,
   RET,
   TRAP,
+  SYSCALL,
 };
 
 struct __AETHER_API__ Section {

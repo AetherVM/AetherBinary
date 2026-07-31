@@ -1097,6 +1097,9 @@ InsnType MachineX86::insnType(void *llvminst, OpcodeInfo *opinfo) {
   if (opcode == X86::INT || opcode == X86::INT3) {
     return TRAP;
   }
+  if (opcode == X86::SYSENTER || opcode == X86::SYSCALL) {
+    return SYSCALL;
+  }
 #if LLVM_VERSION_MAJOR >= 11
   if ((opcode >= X86::JCC_1 && opcode <= X86::JECXZ) || opcode == X86::JRCXZ) {
     return JCOND;
@@ -1289,6 +1292,8 @@ InsnType MachineARM64::insnType(void *llvminst, OpcodeInfo *opinfo) {
     return RET;
   case AArch64::BRK:
     return TRAP;
+  case AArch64::SVC:
+    return SYSCALL;
   case AArch64::UDF:
     return IDATA;
   default:
@@ -1453,6 +1458,9 @@ InsnType MachineARM::insnType(void *llvminst, OpcodeInfo *opinfo) {
   case ARM::BKPT:
   case ARM::tBKPT:
     return TRAP;
+  case ARM::SVC:
+  case ARM::tSVC:
+    return SYSCALL;
   default:
     if (opcode == ARM::tPOP || opcode == ARM::LDMIA_UPD) {
       for (unsigned i = 0; i < ins->getNumOperands(); i++) {
