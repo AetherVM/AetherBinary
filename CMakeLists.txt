@@ -115,6 +115,9 @@ if(APPLE)
     -Wl,-rpath,@loader_path/../lib
     -Wl,-install_name,@rpath/libAetherBinary.dylib
   )
+elseif(MSVC)
+else()
+  target_link_options(AetherBinary PRIVATE -lz -Wl,--no-undefined)
 endif()
 
 target_include_directories(AetherBinary PUBLIC
