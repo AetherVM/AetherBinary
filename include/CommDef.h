@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #ifdef _WIN32
 #ifdef AETHER_DLLIMPL
 #define __AETHER_API__ __declspec(dllexport)
@@ -15,7 +17,7 @@
 #define __AETHER_API__ __attribute__((visibility("default")))
 #endif // end of _WIN32
 
-typedef unsigned long long addr_t;
+typedef uint64_t addr_t;
 
 #define ADDRFMT "%llx"
 
