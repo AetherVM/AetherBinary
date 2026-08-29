@@ -12,11 +12,18 @@ if(CMAKE_BUILD_TYPE STREQUAL "")
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
 endif()
 
-project(AetherBinary)
-
 if(UNIX AND NOT APPLE)
   set(LINUX TRUE)
 endif()
+
+# setup for cmake's compiler pre-check
+if(LINUX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nostdinc++ -I${ICPP_INSTALL_DIR}/include/c++/v1" CACHE STRING "" FORCE)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostdlib++" CACHE STRING "" FORCE)
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -nostdlib++" CACHE STRING "" FORCE)
+endif()
+
+project(AetherBinary)
 
 # setup to use icpp's C++ runtime
 if(MSVC)
@@ -28,8 +35,8 @@ if(MSVC)
   link_directories("${ICPP_INSTALL_DIR}/lib")
   add_link_options("/nodefaultlib:msvcprt.lib" c++.lib) 
 elseif(LINUX)
-  add_compile_options("-nostdinc++" "-nostdlib++" 
-    "-I${ICPP_INSTALL_DIR}/include/c++/v1"
+  add_compile_options(-nostdinc++ -nostdlib++ -fPIC 
+    -I${ICPP_INSTALL_DIR}/include/c++/v1
   )
   add_link_options(@${CMAKE_SOURCE_DIR}/ld.txt
     ${ICPP_INSTALL_DIR}/lib/libc++.so.1
@@ -50,6 +57,10 @@ set(LLVM_INCLUDE_TESTS OFF CACHE BOOL "" FORCE)
 set(LLVM_INCLUDE_BENCHMARKS OFF CACHE BOOL "" FORCE)
 set(LLVM_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
 set(LLVM_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+  
+# as we're using the icpp's clang, any further checks are redundant
+set(LLVM_COMPILER_CHECKED TRUE)
+set(LLVM_COMPILER_IS_GCC_COMPATIBLE FALSE)
 
 # build llvm as a shared library
 set(LLVM_BUILD_LLVM_DYLIB ON CACHE BOOL "" FORCE)

@@ -4,11 +4,19 @@
 # See LICENSE file in the root directory for full license text.
 
 cmake_minimum_required(VERSION 3.20)
-project(AetherBinary VERSION 0.1.1 LANGUAGES C CXX)
 
 if(UNIX AND NOT APPLE)
   set(LINUX TRUE)
 endif()
+
+# setup for cmake's compiler pre-check
+if(LINUX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nostdinc++ -I${ICPP_INSTALL_DIR}/include/c++/v1" CACHE STRING "" FORCE)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostdlib++" CACHE STRING "" FORCE)
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -nostdlib++" CACHE STRING "" FORCE)
+endif()
+
+project(AetherBinary VERSION 0.1.1 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -30,8 +38,8 @@ if(MSVC)
   link_directories("${ICPP_INSTALL_DIR}/lib")
   add_link_options("/nodefaultlib:msvcprt.lib" c++.lib) 
 elseif(LINUX)
-  add_compile_options("-nostdinc++" "-nostdlib++" 
-    "-I${ICPP_INSTALL_DIR}/include/c++/v1"
+  add_compile_options(-nostdinc++ -nostdlib++ -fPIC
+    -I${ICPP_INSTALL_DIR}/include/c++/v1
   )
   add_link_options(@${CMAKE_SOURCE_DIR}/cmake/llvm/ld.txt
     ${ICPP_INSTALL_DIR}/lib/libc++.so.1
