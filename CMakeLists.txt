@@ -88,6 +88,11 @@ add_library(AetherBinary SHARED
   ${HEADER_FILES}
 )
 
+set_target_properties(AetherBinary PROPERTIES
+  SKIP_BUILD_RPATH TRUE
+  SKIP_INSTALL_RPATH TRUE
+)
+
 # link the LLVM shared library
 if(MSVC)
   target_link_directories(AetherBinary PRIVATE ${LLVM_LIBRARY_DIRS})
@@ -103,10 +108,6 @@ target_include_directories(AetherBinary PRIVATE
 )
 
 if(APPLE)
-  set_target_properties(AetherBinary PROPERTIES
-    SKIP_BUILD_RPATH TRUE
-    SKIP_INSTALL_RPATH TRUE
-  )
   target_link_options(AetherBinary PRIVATE
     -Wl,-rpath,@executable_path
     -Wl,-rpath,@executable_path/../lib
@@ -192,25 +193,6 @@ install(FILES
   "${CMAKE_BINARY_DIR}/generated/AetherBinaryConfig.cmake"
   "${CMAKE_BINARY_DIR}/generated/AetherBinaryConfigVersion.cmake"
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/AetherBinary
-)
-
-if(MSVC)
-  set(LIBLLVM "LLVM-22.dll")
-  set(LIBLLVMDIR ${LLVM_TOOLS_BINARY_DIR})
-  set(LLVM_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
-elseif(APPLE)
-  set(LIBLLVM "libLLVM.dylib")
-  set(LIBLLVMDIR ${LLVM_LIBRARY_DIRS})
-  set(LLVM_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
-else()
-  set(LIBLLVM "libLLVM.so.22.1")
-  set(LIBLLVMDIR ${LLVM_LIBRARY_DIRS})
-  set(LLVM_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
-endif()
-
-install(FILES
-  ${LIBLLVMDIR}/${LIBLLVM}
-  DESTINATION ${LLVM_INSTALL_DIR}
 )
 
 install(FILES

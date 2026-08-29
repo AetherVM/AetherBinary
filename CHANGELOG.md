@@ -2,6 +2,7 @@
 ### Bug fixes:
  * fix wrong LC_ID_DYLIB name on macOS;
  * fix mismatch assembler target when cross assembling;
+ * remove libLLVM in package as we're reusing icpp's runtimes;
  
 ### Improvements:
  * reset aarch64 feature string as +all;
