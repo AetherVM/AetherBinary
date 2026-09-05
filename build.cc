@@ -98,6 +98,15 @@ void patch_error_id(std::string_view file) {
   else
     std::println("Ignored, it's already been patched.");
 }
+
+void patch_float_sema(std::string_view file) {
+  std::println("Patching fltSemantics declaration in {}...", file);
+  if (patch_string(file, "LLVM_ABI static const fltSemantics",
+                   "__declspec(dllimport) static const fltSemantics"))
+    std::println("Finished patching.");
+  else
+    std::println("Ignored, it's already been patched.");
+}
 #elif __linux__
 std::string extra_cmake(std::string_view icpp_dir) {
   return std::format(
@@ -153,6 +162,7 @@ int main(int argc, const char *argv[]) {
 
 #if __WIN__
     // post-install patch
+    patch_float_sema(llvm_install_dir.string() + "/include/llvm/ADT/APFloat.h");
     patch_error_id(llvm_install_dir.string() + "/include/llvm/Support/Error.h");
     patch_undef_llvm_abi(llvm_install_dir.string() +
                          "/include/llvm/Support/Compiler.h");
