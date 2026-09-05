@@ -32,8 +32,7 @@ if(MSVC)
   add_compile_options("/clang:-nostdinc++" "/clang:-nostdlib++" 
     "-I${ICPP_INSTALL_DIR}/include/c++/v1" /EHsc
   )
-  link_directories("${ICPP_INSTALL_DIR}/lib")
-  add_link_options("/nodefaultlib:msvcprt.lib" c++.lib) 
+  add_link_options("/libpath:${ICPP_INSTALL_DIR}/lib" "/nodefaultlib:msvcprt.lib" c++.lib) 
 elseif(LINUX)
   add_compile_options(-nostdinc++ -nostdlib++ -fPIC 
     -I${ICPP_INSTALL_DIR}/include/c++/v1
