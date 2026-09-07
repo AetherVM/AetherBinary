@@ -97,6 +97,16 @@ Section __cstring:
 ![Screenshot](https://raw.githubusercontent.com/AetherVM/AetherBinary/main/screenshot/Cutter++.png)
 
 ## Build
+### Windows prepare
+If you're building on Windows, firstly setup the MSVC environment, otherwise skip this:
+```sh
+# all the following steps must be done in "x64 Native Tools Command Prompt for VS"
+# or
+# run VS_ROOT/.../VC/Auxiliary/Build/vcvarsall.bat to initialize for 'x64'
+# replace it to arm64 if you're on a Windows-ARM64 device.
+vcvarsall x64
+```
+### ICPP Build
 To build your own version, you need to have [ICPP](https://github.com/vpand/icpp), **Ninja**, **CMake** available in current terminal session. After a recursive clone of this repo, then build it in one go:
 ```sh
 /path/to/icpp build.cc
