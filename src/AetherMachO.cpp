@@ -517,8 +517,11 @@ bool MachOBinary::analyze(const void *llvmbin) {
   }
 #ifndef _WIN32
   std::string dwarf(filePath());
-  dwarf.insert(dwarf.find_last_of('/'), ".dSYM/Contents/Resources/DWARF");
-  parseDwarf(dwarf);
+  auto last_slash = dwarf.find_last_of('/');
+  if (last_slash != std::string::npos) {
+    dwarf.insert(last_slash, ".dSYM/Contents/Resources/DWARF");
+    parseDwarf(dwarf);
+  }
 #endif
   return true;
 }

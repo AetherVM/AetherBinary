@@ -2,6 +2,7 @@
 ### Bug fixes:
  * fix wrong LC_ID_DYLIB name on macOS;
  * fix mismatch assembler target when cross assembling;
+ * fix .dSYM path compose crash when it's a bare name;
  * remove libLLVM in package as we're reusing icpp's runtimes;
  
 ### Improvements:
