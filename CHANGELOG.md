@@ -1,3 +1,10 @@
+## v0.1.2
+### Bug fixes:
+ * 
+ 
+### Improvements:
+ * add cache option for assembler;
+
 ## v0.1.1
 ### Bug fixes:
  * fix wrong LC_ID_DYLIB name on macOS;

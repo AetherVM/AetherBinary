@@ -465,7 +465,7 @@ static const char *parseOpcode(const char *asmcode, unsigned char opcode[20]) {
 }
 
 std::string Disassembler::assemble(const char *asmcode,
-                                   unsigned char opcode[20]) {
+                                   unsigned char opcode[20], bool cache) {
   auto found = m_asmcache.find(asmcode);
   if (found != m_asmcache.end()) {
     opcode[0] = (uint8_t)found->second.size();
@@ -496,8 +496,10 @@ std::string Disassembler::assemble(const char *asmcode,
 
   if (outs.length()) {
     parseOpcode(outs.c_str(), opcode);
-    m_asmcache.insert(std::make_pair(
-        asmcode, std::string(&opcode[1], &opcode[1] + opcode[0])));
+
+    if (cache)
+      m_asmcache.insert(std::make_pair(
+          asmcode, std::string(&opcode[1], &opcode[1] + opcode[0])));
   }
   return outs;
 }

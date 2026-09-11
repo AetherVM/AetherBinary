@@ -68,7 +68,8 @@ public:
   bool hitCondX64(const uint64_t *gprs, uint64_t flags, unsigned char *mc);
   std::string demangle(const char *sym);
 
-  std::string assemble(const char *asmcode, unsigned char opcode[20]);
+  std::string assemble(const char *asmcode, unsigned char opcode[20],
+                       bool cache = true);
 
 #define SIMDImm LogicalImm
   enum ImmOperandType {
