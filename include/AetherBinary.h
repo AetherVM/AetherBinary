@@ -47,7 +47,7 @@ public:
   const char *arch(bool thumb = false) const;
   static const char *arch(ArchType arch, bool thumb = false);
 
-  void holdBuffer(void *llvmbin, void *filebuff);
+  void holdBuffer(void *llvmbin, void *filebuff, bool attach = false);
 
   FileType fileType() const { return m_filetype; }
   const char *fileTypeString() const;
@@ -151,6 +151,7 @@ protected:
   llvm::MemoryBuffer *m_filebuff;
   int m_fileoff; // for fat file, it's the offset for the real macho
   llvm::object::Binary *m_llvmbin;
+  bool m_attach; // whether own the file buffer and llvm binary or not
 };
 
 __AETHER_API__ void setAnalyzeCallback(analyze_log_t log,
@@ -162,6 +163,8 @@ __AETHER_API__ Binary *New(std::string_view objbuf,
                            bool analyze = true);
 __AETHER_API__ Binary *New(std::unique_ptr<llvm::MemoryBuffer> buff,
                            bool analyze = true);
+__AETHER_API__ Binary *New(llvm::MemoryBuffer *buff,
+                           llvm::object::Binary *llvmbin, bool analyze = true);
 __AETHER_API__ void Delete(Binary *bin);
 
 __AETHER_API__ void compressDBFile(const char *dbpath);

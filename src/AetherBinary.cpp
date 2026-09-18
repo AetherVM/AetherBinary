@@ -121,6 +121,7 @@ Binary::Binary() {
   m_fileoff = 0;
   m_filehash = 0;
   m_llvmbin = nullptr;
+  m_attach = false;
   m_archtype = UnsupportArch;
   m_filetype = UnsupportFile;
   m_baseaddr = INVALID_ADDR;
@@ -135,9 +136,17 @@ Binary::~Binary() {
     delete m_diserthumb;
     m_diserthumb = nullptr;
   }
+
+  if (m_attach)
+    return;
+
   if (m_filebuff) {
     delete (MemoryBuffer *)m_filebuff;
     m_filebuff = nullptr;
+  }
+  if (m_llvmbin) {
+    delete (llvm::object::Binary *)m_llvmbin;
+    m_llvmbin = nullptr;
   }
 }
 
@@ -966,9 +975,10 @@ std::vector<const char *> Binary::importLibs() const {
   }
 }
 
-void Binary::holdBuffer(void *llvmbin, void *filebuff) {
+void Binary::holdBuffer(void *llvmbin, void *filebuff, bool attach) {
   m_llvmbin = (llvm::object::Binary *)llvmbin;
   m_filebuff = (llvm::MemoryBuffer *)filebuff;
+  m_attach = attach;
 
   init();
   if (llvmbin) {
@@ -2496,7 +2506,7 @@ void Binary::patchCallOffset(char *opcptr, addr_t from, addr_t to) const {
 }
 
 static Binary *NewMachO(object::Binary *llvmbin, MemoryBuffer *buff,
-                        bool analyze) {
+                        bool analyze, bool attach = false) {
   object::MachOObjectFile *macho = dyn_cast<object::MachOObjectFile>(llvmbin);
   assert(macho && "must be macho binary");
   Binary *result = nullptr;
@@ -2518,15 +2528,15 @@ static Binary *NewMachO(object::Binary *llvmbin, MemoryBuffer *buff,
     delete buff;
     return nullptr;
   }
-  result->holdBuffer(llvmbin, buff);
+  result->holdBuffer(llvmbin, buff, attach);
   if (analyze) {
     result->analyze(llvmbin);
   }
   return result;
 }
 
-static Binary *NewPE(object::Binary *llvmbin, MemoryBuffer *buff,
-                     bool analyze) {
+static Binary *NewPE(object::Binary *llvmbin, MemoryBuffer *buff, bool analyze,
+                     bool attach = false) {
   object::COFFObjectFile *pe = dyn_cast<object::COFFObjectFile>(llvmbin);
   assert(pe && "must be pe binary");
   Binary *result = nullptr;
@@ -2545,15 +2555,15 @@ static Binary *NewPE(object::Binary *llvmbin, MemoryBuffer *buff,
     delete buff;
     return nullptr;
   }
-  result->holdBuffer(llvmbin, buff);
+  result->holdBuffer(llvmbin, buff, attach);
   if (analyze) {
     result->analyze(llvmbin);
   }
   return result;
 }
 
-static Binary *NewELF(object::Binary *llvmbin, MemoryBuffer *buff,
-                      bool analyze) {
+static Binary *NewELF(object::Binary *llvmbin, MemoryBuffer *buff, bool analyze,
+                      bool attach = false) {
   object::ELFObjectFileBase *elf = dyn_cast<object::ELFObjectFileBase>(llvmbin);
   assert(elf && "must be elf binary");
   Binary *result = nullptr;
@@ -2575,7 +2585,7 @@ static Binary *NewELF(object::Binary *llvmbin, MemoryBuffer *buff,
     delete buff;
     return nullptr;
   }
-  result->holdBuffer(llvmbin, buff);
+  result->holdBuffer(llvmbin, buff, attach);
   if (analyze) {
     result->analyze(llvmbin);
   }
@@ -2747,6 +2757,32 @@ Binary *New(std::unique_ptr<MemoryBuffer> buff, bool analyze) {
     return NewELF(errOrBin.get().release(), buff.release(), analyze);
   default:
     return anybin();
+  }
+}
+
+Binary *New(llvm::MemoryBuffer *buff, llvm::object::Binary *llvmbin,
+            bool analyze) {
+  MemoryBufferRef buffref(*buff);
+  switch (identify_magic(buff->getBuffer())) {
+  case file_magic::macho_object:
+  case file_magic::macho_executable:
+  case file_magic::macho_dynamically_linked_shared_lib:
+  case file_magic::macho_bundle:
+  case file_magic::macho_kext_bundle:
+  case file_magic::macho_dynamically_linked_shared_lib_stub:
+  case file_magic::macho_dynamic_linker:
+  case file_magic::macho_preload_executable:
+    return NewMachO(llvmbin, buff, analyze, true);
+  case file_magic::coff_object:
+  case file_magic::pecoff_executable:
+  case file_magic::coff_import_library:
+    return NewPE(llvmbin, buff, analyze, true);
+  case file_magic::elf_relocatable:
+  case file_magic::elf_executable:
+  case file_magic::elf_shared_object:
+    return NewELF(llvmbin, buff, analyze, true);
+  default:
+    return nullptr;
   }
 }
 

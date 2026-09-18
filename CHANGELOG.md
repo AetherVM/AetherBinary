@@ -1,9 +1,10 @@
 ## v0.1.2
 ### Bug fixes:
- * 
+ * fix not delete the holding llvm object binary instance;
  
 ### Improvements:
  * add cache option for assembler;
+ * add attach mode for binary creation;
 
 ## v0.1.1
 ### Bug fixes:
