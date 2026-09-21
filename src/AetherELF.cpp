@@ -22,6 +22,9 @@ namespace aether {
 ELFBinary::ELFBinary() { m_filetype = ELF; }
 
 ELFBinary::~ELFBinary() {
+  if (m_attach)
+    return;
+
   if (m_llvmbin) {
     if (isa<object::ELF32LEObjectFile>(
             (object::ELFObjectFileBase *)m_llvmbin)) {

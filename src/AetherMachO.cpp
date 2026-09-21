@@ -28,6 +28,9 @@ MachOBinary::MachOBinary() {
 }
 
 MachOBinary::~MachOBinary() {
+  if (m_attach)
+    return;
+
   if (m_llvmbin) {
     delete (object::MachOObjectFile *)m_llvmbin;
     m_llvmbin = nullptr;

@@ -144,10 +144,6 @@ Binary::~Binary() {
     delete (MemoryBuffer *)m_filebuff;
     m_filebuff = nullptr;
   }
-  if (m_llvmbin) {
-    delete (llvm::object::Binary *)m_llvmbin;
-    m_llvmbin = nullptr;
-  }
 }
 
 bool Binary::valid() const {

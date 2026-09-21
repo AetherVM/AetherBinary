@@ -28,6 +28,9 @@ namespace aether {
 PEBinary::PEBinary() { m_filetype = PE; }
 
 PEBinary::~PEBinary() {
+  if (m_attach)
+    return;
+
   if (m_llvmbin) {
     delete (object::COFFObjectFile *)m_llvmbin;
     m_llvmbin = nullptr;
