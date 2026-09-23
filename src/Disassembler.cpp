@@ -48,7 +48,8 @@
 
 using namespace llvm;
 
-int llvm_mc_main(int argc, char **argv, raw_pwrite_stream *rawos, void *ctx);
+int llvm_mc_main(const char *triple, const char *asmcode,
+                 raw_pwrite_stream *rawos, void *ctx);
 
 namespace aether {
 
@@ -474,24 +475,17 @@ std::string Disassembler::assemble(const char *asmcode,
   }
 
   DisassemblerContext *ctx = (DisassemblerContext *)m_ctx;
-  std::string triple("-triple-aebi=");
+  std::string triple;
   if (ctx->TripleName == "x86-none-linux-android" ||
       ctx->TripleName == "x86-pc-windows-msvc") {
-    triple += "i386-apple-macosx";
+    triple = "i386-apple-macosx";
   } else {
-    triple += ctx->TripleName;
+    triple = ctx->TripleName;
   }
-  const char *argv[] = {
-      AETHER_LIB_NAME,
-      "-show-encoding-aebi",
-      triple.c_str(),
-      asmcode,
-  };
   opcode[0] = 0;
   std::string &outs = ctx->TOSstr;
   outs.clear();
-  llvm_mc_main(sizeof(argv) / sizeof(argv[0]), (char **)&argv[0],
-               &ctx->TOS.os(), ctx);
+  llvm_mc_main(triple.c_str(), asmcode, &ctx->TOS.os(), ctx);
   ctx->TOS.os().flush();
 
   if (outs.length()) {

@@ -51,154 +51,7 @@
 
 using namespace llvm;
 
-static mc::RegisterMCTargetOptionsFlags MOF;
-
-static cl::opt<std::string>
-    InputFilename(cl::Positional, cl::desc("<input file>"), cl::init("-"));
-#if 0
-static cl::opt<std::string> OutputFilename("o-aebi", cl::desc("Output filename"),
-                                           cl::value_desc("filename"),
-                                           cl::init("-"));
-#endif
-static cl::opt<std::string> SplitDwarfFile("split-dwarf-file-aebi",
-                                           cl::desc("DWO output filename"),
-                                           cl::value_desc("filename"));
-
-static cl::opt<bool> ShowEncoding("show-encoding-aebi",
-                                  cl::desc("Show instruction encodings"));
-
-static cl::opt<bool> RelaxELFRel(
-    "relax-relocations-aebi", cl::init(true),
-    cl::desc("Emit R_X86_64_GOTPCRELX instead of R_X86_64_GOTPCREL"));
-
-#if 0
-static cl::opt<DebugCompressionType> CompressDebugSections(
-    "compress-debug-sections-aebi", cl::ValueOptional,
-    cl::init(DebugCompressionType::None),
-    cl::desc("Choose DWARF debug sections compression:"),
-    cl::values(clEnumValN(DebugCompressionType::None, "none", "No compression"),
-               clEnumValN(DebugCompressionType::Z, "zlib",
-                          "Use zlib compression"),
-               clEnumValN(DebugCompressionType::GNU, "zlib-gnu",
-                          "Use zlib-gnu compression (deprecated)")));
-#endif
-
-static cl::opt<bool>
-    ShowInst("show-inst-aebi",
-             cl::desc("Show internal instruction representation"));
-
-static cl::opt<bool>
-    ShowInstOperands("show-inst-operands-aebi",
-                     cl::desc("Show instructions operands as parsed"));
-
-static cl::opt<unsigned>
-    OutputAsmVariant("output-asm-variant-aebi",
-                     cl::desc("Syntax variant to use for output printing"));
-
-static cl::opt<bool>
-    PrintImmHex("print-imm-hex-aebi", cl::init(false),
-                cl::desc("Prefer hex format for immediate values"));
-
-static cl::list<std::string>
-    DefineSymbol("defsym-aebi",
-                 cl::desc("Defines a symbol to be an integer constant"));
-
-static cl::opt<bool>
-    PreserveComments("preserve-comments-aebi",
-                     cl::desc("Preserve Comments in outputted assembly"));
-
 enum OutputFileType { OFT_Null, OFT_AssemblyFile, OFT_ObjectFile };
-static cl::opt<OutputFileType>
-    FileType("filetype-aebi", cl::init(OFT_AssemblyFile),
-             cl::desc("Choose an output file type:"),
-             cl::values(clEnumValN(OFT_AssemblyFile, "asm",
-                                   "Emit an assembly ('.s') file"),
-                        clEnumValN(OFT_Null, "null",
-                                   "Don't emit anything (for timing purposes)"),
-                        clEnumValN(OFT_ObjectFile, "obj",
-                                   "Emit a native object ('.o') file")));
-
-static cl::list<std::string> IncludeDirs("I-aebi",
-                                         cl::desc("Directory of include files"),
-                                         cl::value_desc("directory"),
-                                         cl::Prefix);
-
-static cl::opt<std::string>
-    ArchName("arch-aebi", cl::desc("Target arch to assemble for, "
-                                   "see -version for available targets"));
-
-static cl::opt<std::string>
-    TripleName("triple-aebi", cl::desc("Target triple to assemble for, "
-                                       "see -version for available targets"));
-
-static cl::opt<std::string>
-    MCPU("mcpu-aebi",
-         cl::desc("Target a specific cpu type (-mcpu=help for details)"),
-         cl::value_desc("cpu-name"), cl::init(""));
-
-static cl::list<std::string>
-    MAttrs("mattr-aebi", cl::CommaSeparated,
-           cl::desc("Target specific attributes (-mattr=help for details)"),
-           cl::value_desc("a1,+a2,-a3,..."));
-
-static cl::opt<bool> PIC("position-independent-aebi",
-                         cl::desc("Position independent"), cl::init(false));
-
-static cl::opt<bool>
-    LargeCodeModel("large-code-model-aebi",
-                   cl::desc("Create cfi directives that assume the code might "
-                            "be more than 2gb away"));
-
-static cl::opt<bool>
-    NoInitialTextSection("n-aebi", cl::desc("Don't assume assembly file starts "
-                                            "in the text section"));
-
-static cl::opt<bool>
-    GenDwarfForAssembly("g-aebi",
-                        cl::desc("Generate dwarf debugging info for assembly "
-                                 "source files"));
-
-static cl::opt<std::string>
-    DebugCompilationDir("fdebug-compilation-dir-aebi",
-                        cl::desc("Specifies the debug info's compilation dir"));
-
-static cl::list<std::string>
-    DebugPrefixMap("fdebug-prefix-map-aebi",
-                   cl::desc("Map file source paths in debug info"),
-                   cl::value_desc("= separated key-value pairs"));
-
-static cl::opt<std::string> MainFileName(
-    "main-file-name-aebi",
-    cl::desc("Specifies the name we should consider the input file"));
-
-#if LLVM_VERSION_MAJOR < 22
-static cl::opt<bool> SaveTempLabels("save-temp-labels-aebi",
-                                    cl::desc("Don't discard temporary labels"));
-#endif
-
-static cl::opt<bool> LexMasmIntegers(
-    "masm-integers-aebi",
-    cl::desc("Enable binary and hex masm integers (0b110 and 0ABCh)"));
-
-static cl::opt<bool> NoExecStack("no-exec-stack-aebi",
-                                 cl::desc("File doesn't need an exec stack"));
-
-enum ActionType {
-  AC_AsLex,
-  AC_Assemble,
-  AC_Disassemble,
-  AC_MDisassemble,
-};
-
-static cl::opt<ActionType> Action(
-    cl::desc("Action to perform:"), cl::init(AC_Assemble),
-    cl::values(clEnumValN(AC_AsLex, "as-lex", "Lex tokens from a .s file"),
-               clEnumValN(AC_Assemble, "assemble",
-                          "Assemble a .s file (default)"),
-               clEnumValN(AC_Disassemble, "disassemble",
-                          "Disassemble strings of hex bytes"),
-               clEnumValN(AC_MDisassemble, "mdis",
-                          "Marked up disassembly of strings of hex bytes")));
 
 static std::unique_ptr<ToolOutputFile>
 GetOutputStream(StringRef Path, sys::fs::OpenFlags Flags) {
@@ -245,26 +98,7 @@ static int AsLexInput(SourceMgr &SrcMgr, MCAsmInfo &MAI, raw_ostream &OS) {
   return Error;
 }
 
-static int fillCommandLineSymbols(MCAsmParser &Parser) {
-  for (auto &I : DefineSymbol) {
-    auto Pair = StringRef(I).split('=');
-    auto Sym = Pair.first;
-    auto Val = Pair.second;
-
-    if (Sym.empty() || Val.empty()) {
-      WithColor::error() << "defsym must be of the form: sym=value: " << I
-                         << "\n";
-      return 1;
-    }
-    int64_t Value;
-    if (Val.getAsInteger(0, Value)) {
-      WithColor::error() << "value is not an integer: " << Val << "\n";
-      return 1;
-    }
-    Parser.getContext().setSymbolValue(Parser.getStreamer(), Sym, Value);
-  }
-  return 0;
-}
+static int fillCommandLineSymbols(MCAsmParser &Parser) { return 0; }
 
 namespace aether {
 extern const llvm::Target *diser_getTarget(void *ctx);
@@ -306,16 +140,17 @@ static int AssembleInput(void *ctx, const char *ProgName,
   int SymbolResult = fillCommandLineSymbols(*Parser);
   if (SymbolResult)
     return SymbolResult;
-  Parser->setShowParsedOperands(ShowInstOperands);
+  Parser->setShowParsedOperands(false);
   Parser->setTargetParser(*TAP);
-  Parser->getLexer().setLexMasmIntegers(LexMasmIntegers);
+  Parser->getLexer().setLexMasmIntegers(false);
 
-  int Res = Parser->Run(NoInitialTextSection);
+  int Res = Parser->Run(false);
 
   return Res;
 }
 
-int llvm_mc_main(int argc, char **argv, raw_pwrite_stream *rawos, void *ctx) {
+int llvm_mc_main(const char *triple, const char *asmcode,
+                 raw_pwrite_stream *rawos, void *ctx) {
   // let aether::Disassembler do this
 #if 0
   InitLLVM X(argc, argv);
@@ -339,32 +174,23 @@ int llvm_mc_main(int argc, char **argv, raw_pwrite_stream *rawos, void *ctx) {
   MCOptions.AsmVerbose = true;
 #endif
 
-  const char *ProgName = argv[0];
+  const char *ProgName = "AetherBinary";
   const Target *TheTarget = GetTarget(ProgName);
   if (!TheTarget)
     return 1;
   // Now that GetTarget() has (potentially) replaced TripleName, it's safe to
   // construct the Triple object.
-  Triple TheTriple(TripleName);
+  Triple TheTriple(triple);
 
   ErrorOr<std::unique_ptr<MemoryBuffer>> BufferPtr =
       // MemoryBuffer::getFileOrSTDIN(InputFilename)
-      MemoryBuffer::getMemBuffer(argv[3]);
-  if (std::error_code EC = BufferPtr.getError()) {
-    WithColor::error(errs(), ProgName)
-        << InputFilename << ": " << EC.message() << '\n';
-    return 1;
-  }
+      MemoryBuffer::getMemBuffer(asmcode);
   MemoryBuffer *Buffer = BufferPtr->get();
 
   SourceMgr SrcMgr;
 
   // Tell SrcMgr about this buffer, which is what the parser will pick up.
   SrcMgr.AddNewSourceBuffer(std::move(*BufferPtr), SMLoc());
-
-  // Record the location of the include directories so that the lexer can find
-  // it later.
-  SrcMgr.setIncludeDirs(IncludeDirs);
 
 #if USE_CACHE_INST
   MCRegisterInfo *MRI(TheTarget_createMCRegInfo(TripleName));
@@ -396,16 +222,7 @@ int llvm_mc_main(int argc, char **argv, raw_pwrite_stream *rawos, void *ctx) {
   }
 #endif
 
-  MAI->setPreserveAsmComments(PreserveComments);
-
-  // Package up features to be passed to target/subtarget
-  std::string FeaturesStr;
-  if (MAttrs.size()) {
-    SubtargetFeatures Features;
-    for (unsigned i = 0; i != MAttrs.size(); ++i)
-      Features.AddFeature(MAttrs[i]);
-    FeaturesStr = Features.getString();
-  }
+  MAI->setPreserveAsmComments(false);
 
 #if USE_CACHE_INST
   MCStreamer *Str = nullptr;
@@ -429,6 +246,7 @@ int llvm_mc_main(int argc, char **argv, raw_pwrite_stream *rawos, void *ctx) {
   MCContext Ctx(TheTriple, MAI.get(), MRI.get(), STI.get(), &SrcMgr,
                 &MCOptions);
 #endif
+  bool PIC = true, LargeCodeModel = false;
   std::unique_ptr<MCObjectFileInfo> MOFI(
       TheTarget->createMCObjectFileInfo(Ctx, PIC, LargeCodeModel));
   Ctx.setObjectFileInfo(MOFI.get());
@@ -497,7 +315,7 @@ int llvm_mc_main(int argc, char **argv, raw_pwrite_stream *rawos, void *ctx) {
 
   std::unique_ptr<buffer_ostream> BOS;
   raw_pwrite_stream *OS = rawos;
-
+  OutputFileType FileType = OFT_AssemblyFile;
   MCInstPrinter *IP = nullptr;
   if (FileType == OFT_AssemblyFile) {
 #if USE_CACHE_INST
@@ -511,22 +329,16 @@ int llvm_mc_main(int argc, char **argv, raw_pwrite_stream *rawos, void *ctx) {
     if (!IP) {
       WithColor::error()
           << "unable to create instruction printer for target triple '"
-          << TheTriple.normalize() << "' with assembly variant "
-          << OutputAsmVariant << ".\n";
+          << TheTriple.normalize() << ".\n";
       return 1;
     }
 
     // Set the display preference for hex vs. decimal immediates.
-    IP->setPrintImmHex(PrintImmHex);
+    IP->setPrintImmHex(true);
 
 #if USE_CACHE_INST
     // Set up the AsmStreamer.
     MCCodeEmitter *CE = nullptr;
-    if (ShowEncoding)
-      CE = nullptr; // TheTarget_createMCCodeEmitter(*MCII, *MRI, Ctx);
-    else
-      (void)CE;
-
     MCAsmBackend *MAB(
         nullptr); // TheTarget_createMCAsmBackend(*STI, *MRI, MCOptions));
     // auto FOut = std::make_unique<formatted_raw_ostream>(*OS);
@@ -580,47 +392,6 @@ int llvm_mc_main(int argc, char **argv, raw_pwrite_stream *rawos, void *ctx) {
   // Use Assembler information for parsing.
   Str->setUseAssemblerInfoForParsing(true);
 
-  int Res = 1;
-  bool disassemble = false;
-  switch (Action) {
-  case AC_AsLex:
-    Res = AsLexInput(SrcMgr, *MAI, *OS);
-    break;
-  case AC_Assemble:
-    Res = AssembleInput(ctx, ProgName, TheTarget, SrcMgr, Ctx, *Str, *MAI, *STI,
-                        *MCII, MCOptions);
-    break;
-  case AC_MDisassemble:
-    assert(IP && "Expected assembly output");
-    IP->setUseMarkup(true);
-    disassemble = true;
-    break;
-  case AC_Disassemble:
-    disassemble = true;
-    break;
-  }
-#if 0
-  if (disassemble)
-    Res = Disassembler::disassemble(*TheTarget, TripleName, *STI, *Str, *Buffer,
-                                    SrcMgr, Ctx, *OS, MCOptions);
-#else
-  (void)disassemble;
-#endif
-
-#if USE_CACHE_INST
-#else
-  // Keep output if no errors.
-  if (Res == 0) {
-    Out->keep();
-    if (DwoOut)
-      DwoOut->keep();
-  }
-
-  ShowEncoding.reset();
-  TripleName.reset();
-  InputFilename.reset();
-  OutputAsmVariant.reset();
-#endif
-
-  return Res;
+  return AssembleInput(ctx, ProgName, TheTarget, SrcMgr, Ctx, *Str, *MAI, *STI,
+                       *MCII, MCOptions);
 }
