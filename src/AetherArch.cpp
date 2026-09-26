@@ -1653,4 +1653,10 @@ addr_t MachineARM::dstAddr(void *llvminst, int opclen, addr_t pc) {
   }
 }
 
+int MachineX86::defaultSize() { return 1; }
+
+int MachineARM64::defaultSize() { return 4; }
+
+int MachineARM::defaultSize() { return 4; }
+
 } // namespace aether

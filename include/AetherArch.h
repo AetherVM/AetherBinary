@@ -53,7 +53,7 @@ public:
   MachineX86() { m_arch = X86_64; }
   virtual ~MachineX86() {}
 
-  virtual int defaultSize() { return 1; }
+  virtual int defaultSize();
 
   virtual bool isCallReg(void *llvminst);
   virtual bool isCallMem(void *llvminst);
@@ -70,7 +70,7 @@ public:
   MachineARM64() { m_arch = ARM64; }
   virtual ~MachineARM64() {}
 
-  virtual int defaultSize() { return 4; }
+  virtual int defaultSize();
 
   virtual bool isCallReg(void *llvminst);
   virtual bool isCallMem(void *llvminst);
@@ -88,7 +88,7 @@ public:
   MachineARM() { m_arch = ARM; }
   virtual ~MachineARM() {}
 
-  virtual int defaultSize() { return 4; }
+  virtual int defaultSize();
 
   virtual bool isCallReg(void *llvminst);
   virtual bool isCallMem(void *llvminst);
