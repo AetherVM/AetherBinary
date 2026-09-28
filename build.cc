@@ -172,11 +172,13 @@ int main(int argc, const char *argv[]) {
 
   std::println("Phase 2: Build AetherBinary...");
 
-  auto build_type = "Release";
+  std::string build_type = "Release";
   if (argc > 1) {
     build_type = argv[1];
-#if __WIN__
-    build_type = "RelWithDebInfo";
+#if __LINUX__ || __WIN__
+    // to make the c++ runtime compatible with the prebuilt icpp's c++ library
+    if (build_type == "Debug")
+      build_type = "RelWithDebInfo";
 #endif
   }
 
