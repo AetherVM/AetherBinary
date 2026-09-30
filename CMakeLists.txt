@@ -45,6 +45,8 @@ elseif(LINUX)
     ${ICPP_INSTALL_DIR}/lib/libc++.so.1
     ${ICPP_INSTALL_DIR}/lib/libc++abi.so.1 
     ${ICPP_INSTALL_DIR}/lib/libunwind.so.1) 
+elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+  add_compile_options(-DAETHER_IOS=1)
 endif()
 
 configure_file(

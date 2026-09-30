@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 3.20)
 # Default to a Release config. Required before project() because Windows defaults to Debug
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING "")
 if(CMAKE_BUILD_TYPE STREQUAL "")
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
 endif()
 
 if(UNIX AND NOT APPLE)
@@ -41,6 +41,9 @@ elseif(LINUX)
     ${ICPP_INSTALL_DIR}/lib/libc++.so.1
     ${ICPP_INSTALL_DIR}/lib/libc++abi.so.1 
     ${ICPP_INSTALL_DIR}/lib/libunwind.so.1) 
+elseif(APPLE)
+  # LLVM needs this to set the correct linker flags, but the ios.toolchain.cmake set it as iOS
+  set(CMAKE_SYSTEM_NAME "Darwin")
 endif()
 
 # enable targets which remill supports even though AetherBinary doesn't support Sparc yet

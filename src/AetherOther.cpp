@@ -18,13 +18,6 @@ void initTimerOptions() {}
 void initWithColorOptions() {}
 void initDebugOptions() {}
 void initRandomSeedOptions() {}
-
-#if __APPLE__
-#ifndef NDEBUG
-// fix missing symbols on iOS
-int DisableABIBreakingChecks = 1;
-#endif
-#endif
 } // namespace llvm
 
 using namespace llvm;
