@@ -120,7 +120,8 @@ int main(int argc, const char *argv[]) {
     args.push_back(std::format("-DCMAKE_BUILD_TYPE={}", type));
     args.push_back(std::format("-DCMAKE_PREFIX_PATH={}/install", build_llvm));
     args.push_back(std::format("-DLLVM_BUILD_DIR={}/llvm", build_llvm));
-    args.push_back(std::format("-DCMAKE_INSTALL_PREFIX={}", build_aebi));
+    args.push_back(
+        std::format("-DCMAKE_INSTALL_PREFIX={}/install", build_aebi));
     args.push_back("-B");
     args.push_back(build_aebi);
     args.push_back(thisdir);
