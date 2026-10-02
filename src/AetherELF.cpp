@@ -53,8 +53,6 @@ template <typename ELFFILE> static addr_t get_baseaddr(const ELFFILE &elffile) {
 }
 
 void ELFBinary::initBaseAddr(const void *llvmbin) {
-#if AETHER_IOS
-#else
 #if LLVM_VERSION_MAJOR >= 14
   if (is32Bits()) {
     m_baseaddr = get_baseaddr(obj32->getELFFile());
@@ -68,7 +66,6 @@ void ELFBinary::initBaseAddr(const void *llvmbin) {
     m_baseaddr = get_baseaddr(*obj64->getELFFile());
   }
 #endif
-#endif // end of AETHER_IOS
 }
 
 template <typename BIN, typename ELF_REL, typename ELF_SYM>
@@ -378,9 +375,6 @@ void ELFBinary::initImports(const void *llvmbin) {
     pltentsz = 0x10;
     break;
   }
-#if AETHER_IOS
-  // nop for iOS
-#else
   if (is32Bits()) {
     initELFImports<object::ELF32LEObjectFile,
                    object::ELF32LEObjectFile::Elf_Rel,
@@ -394,7 +388,6 @@ void ELFBinary::initImports(const void *llvmbin) {
         obj64, m_funcs, m_imports, m_impfuncs, ".rela.plt", ".rela.dyn",
         pltaddroff, pltentsz, this);
   }
-#endif // end of AETHER_IOS
   // change foff(init is address) to real file offset
   for (auto &imp : m_imports) {
     auto sect = addrSect(imp.foff);
@@ -501,17 +494,12 @@ std::vector<const char *> import_elflibs(const Binary *bin, T *elf) {
 }
 
 std::vector<const char *> Binary::importELFLibs() const {
-#if AETHER_IOS
-  std::vector<const char *> empty;
-  return empty;
-#else
   void *llvmbin = m_llvmbin;
   if (is32Bits()) {
     return import_elflibs(this, (object::ELF32LEObjectFile *)llvmbin);
   } else {
     return import_elflibs(this, (object::ELF64LEObjectFile *)llvmbin);
   }
-#endif
 }
 
 ImportInfos ELFBinary::parseImports() {
@@ -808,10 +796,6 @@ void ELFBinary::analyzePrograms(const ELFOBJ *elfobj, const ELFFILE *elffile) {
 }
 
 bool ELFBinary::analyze(const void *llvmbin) {
-#if AETHER_IOS
-  // unsupport for iOS
-  return false;
-#else
   if (!Binary::analyze(llvmbin)) {
     return false;
   }
@@ -1055,7 +1039,6 @@ bool ELFBinary::analyze(const void *llvmbin) {
   }
 #endif
   return true;
-#endif // end of AETHER_IOS
 }
 
 ELFX32Binary::ELFX32Binary() { m_archtype = X86; }

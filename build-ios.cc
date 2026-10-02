@@ -101,19 +101,15 @@ int main(int argc, const char *argv[]) {
     // construct an install package from host one for iOS as the official LLVM's
     // cmake script doesn't support it
     auto installdir = build_llvm + "/install";
-    std::system(
-        std::format(
-            "cd {0}; mkdir -p {1}/lib; cp -r build-llvm/install/bin {1}/; cp "
-            "-r build-llvm/install/include {1}/; "
-            "cp -r build-llvm/install/lib/cmake {1}/lib/; cp "
-            "{1}/../llvm/lib/*.dylib {1}/lib/; cp {1}/../llvm/lib/*.a "
-            "{1}/lib/; touch {1}/lib/libLTO.dylib",
-            thisdir, installdir)
-            .data());
+    std::system(std::format("cd {0}; cp -r build-llvm/install {1}; cp -f "
+                            "{1}/../llvm/lib/*.dylib {1}/lib/; cp -f "
+                            "{1}/../llvm/lib/*.a {1}/lib/",
+                            thisdir, installdir)
+                    .data());
   }
 
   // build AetherBinary
-  auto build_aebi = std::format("{}/{}.{}", thisdir, builddir, type);
+  auto build_aebi = std::format("{}/{}-{}", thisdir, builddir, type);
   auto ninja = (fs::path(build_aebi) / "build.ninja").string();
   if (!fs::exists(ninja)) {
     auto args = common_args(thisdir);

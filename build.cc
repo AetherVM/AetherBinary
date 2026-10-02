@@ -23,10 +23,6 @@ Usage:
 #define command(fmt, ...) std::println(fmt, __VA_ARGS__);
 #endif
 
-#if __WIN__
-#define EXTRA_CMAKE                                                            \
-  " -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl "
-
 bool patch_string(std::string_view infile, std::string_view pattern,
                   std::string_view replace) {
   std::stringstream buffer;
@@ -42,7 +38,7 @@ bool patch_string(std::string_view infile, std::string_view pattern,
   if (content.starts_with(patch_magic))
     return false;
 
-  size_t pos = 0;
+  std::size_t pos = 0;
   while ((pos = content.find(pattern, pos)) != std::string::npos) {
     // do the replacement
     content.replace(pos, pattern.length(), replace);
@@ -63,6 +59,8 @@ bool patch_string(std::string_view infile, std::string_view pattern,
   fs::rename(temp_file, infile);
   return true;
 }
+
+#if __WIN__
 
 // AetherBinary links to LLVM.dll, the LLVM_ABI will cause problem
 // on Windows with linkage issues, so we remove its LLVM_ABI attribute
@@ -107,14 +105,35 @@ void patch_float_sema(std::string_view file) {
   else
     std::println("Ignored, it's already been patched.");
 }
+
+#define EXTRA_CMAKE                                                            \
+  " -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl "
 #elif __linux__
+
 std::string extra_cmake(std::string_view icpp_dir) {
   return std::format(
       " -DCMAKE_C_COMPILER={}/bin/clang -DCMAKE_CXX_COMPILER={}/bin/clang++ ",
       icpp_dir, icpp_dir);
 }
+
 #define EXTRA_CMAKE extra_cmake(icpp_dir.string())
 #else
+
+void patch_template_llvm_abi(std::string_view file) {
+  std::println("Patching LLVM_TEMPLATE_ABI declaration in {}...", file);
+  if (patch_string(file, "#if !defined(LLVM_ABI)",
+                   R"(
+#if defined(LLVM_EXPORTS)
+#undef LLVM_TEMPLATE_ABI
+#define LLVM_TEMPLATE_ABI LLVM_ABI
+#endif   
+
+#if !defined(LLVM_ABI))"))
+    std::println("Finished patching.");
+  else
+    std::println("Ignored, it's already been patched.");
+}
+
 #define EXTRA_CMAKE ""
 #endif
 
@@ -152,6 +171,11 @@ int main(int argc, const char *argv[]) {
     patch_llvm_abi(script_dir.string() +
                    "/third/llvm-project/llvm/include/llvm/"
                    "ExecutionEngine/Orc/BacktraceTools.h");
+#elif __APPLE__
+    // pre-build patch
+    patch_template_llvm_abi(
+        script_dir.string() +
+        "/third/llvm-project/llvm/include/llvm/Support/Compiler.h");
 #endif
 
     command("cmake -S {} -B {} -G Ninja -DICPP_INSTALL_DIR={} {}",
