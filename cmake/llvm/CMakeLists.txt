@@ -62,9 +62,11 @@ set(LLVM_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(LLVM_ENABLE_PLUGINS OFF CACHE BOOL "" FORCE)
 set(LLVM_ENABLE_EXPORTED_SYMBOLS_IN_PLUGINS OFF CACHE BOOL "" FORCE)
 
-# as we're using the icpp's clang, any further checks are redundant
-set(LLVM_COMPILER_CHECKED TRUE)
-set(LLVM_COMPILER_IS_GCC_COMPATIBLE FALSE)
+if(LINUX)
+  # as we're using the icpp's clang, any further checks are redundant
+  set(LLVM_COMPILER_CHECKED TRUE)
+  set(LLVM_COMPILER_IS_GCC_COMPATIBLE FALSE)
+endif()
 
 # build llvm as a shared library
 set(LLVM_BUILD_LLVM_DYLIB ON CACHE BOOL "" FORCE)

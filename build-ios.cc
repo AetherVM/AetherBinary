@@ -72,7 +72,6 @@ bool patch_string(std::string_view infile, std::string_view pattern,
 
 void patch_build_ninja(std::string_view ninja) {
   // iPhoneSDK doesn't provide these libraries
-  patch_string(ninja, "-latomic", " ");
   patch_string(ninja, "-lrt", " ");
 }
 
@@ -103,7 +102,9 @@ int main(int argc, const char *argv[]) {
     auto installdir = build_llvm + "/install";
     std::system(std::format("cd {0}; cp -r build-llvm/install {1}; cp -f "
                             "{1}/../llvm/lib/*.dylib {1}/lib/; cp -f "
-                            "{1}/../llvm/lib/*.a {1}/lib/",
+                            "{1}/../llvm/lib/*.a {1}/lib/; cp -f "
+                            "{1}/../llvm/include/llvm/Config/abi-breaking.h "
+                            "{1}/include/llvm/Config/abi-breaking.h",
                             thisdir, installdir)
                     .data());
   }
