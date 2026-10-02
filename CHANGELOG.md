@@ -1,6 +1,7 @@
 ## v0.1.2
 ### Bug fixes:
  * fix windows symbol export issue when implementation is in header;
+ * fix failing to assemble when the output is buffered;
  
 ### Improvements:
  * add cache option for assembler;

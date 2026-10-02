@@ -98,9 +98,12 @@ set_target_properties(AetherBinary PROPERTIES
 # link the LLVM shared library
 if(MSVC)
   target_link_directories(AetherBinary PRIVATE ${LLVM_LIBRARY_DIRS})
-  target_link_libraries(AetherBinary PRIVATE LLVM-22 LLVMSupport)
+  target_link_libraries(AetherBinary PRIVATE LLVM-22)
 else()
-  target_link_libraries(AetherBinary PRIVATE LLVM LLVMSupport)
+  target_link_libraries(AetherBinary PRIVATE LLVM)
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_link_libraries(AetherBinary PRIVATE ${LLVM_BUILD_DIR}/lib/Support/CMakeFiles/LLVMSupport.dir/SmallVector.cpp.o)
+  endif()
 endif()
 
 target_include_directories(AetherBinary PRIVATE 

@@ -163,12 +163,13 @@ void AssembleDiagHandlerTy(const SMDiagnostic &smd, void *Context) {
   fprintf(stderr, "%s\n", smd.getMessage().data());
 }
 
-class hack_raw_fd_ostream : public raw_fd_ostream {
+class rawstr_ostream : public raw_pwrite_stream {
   std::string &m_outs;
 
 public:
-  hack_raw_fd_ostream(std::string &outs)
-      : raw_fd_ostream(0, false), m_outs(outs) {}
+  rawstr_ostream(std::string &outs) : raw_pwrite_stream(true), m_outs(outs) {
+    SetUnbuffered();
+  }
 
   void write_impl(const char *Ptr, size_t Size) override {
     pwrite_impl(Ptr, Size, 0);
@@ -177,16 +178,18 @@ public:
   void pwrite_impl(const char *Ptr, size_t Size, uint64_t Offset) override {
     m_outs += std::string(Ptr, Size);
   }
+
+  uint64_t current_pos() const override { return m_outs.size(); }
 };
 
 class ToolOutputString {
-  hack_raw_fd_ostream OS;
+  rawstr_ostream OS;
 
 public:
   ToolOutputString(std::string &outs) : OS(outs) {}
 
   /// Return the contained raw_fd_ostream.
-  hack_raw_fd_ostream &os() { return OS; }
+  rawstr_ostream &os() { return OS; }
 };
 
 struct DisassemblerContext {
