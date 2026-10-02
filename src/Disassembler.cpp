@@ -211,7 +211,9 @@ struct DisassemblerContext {
 #else
   MCObjectFileInfo MOFI;
 #endif
+  // borrowed pointer
   MCInstPrinter *IP;
+  MCCodeEmitter *CE;
   ToolOutputString TOS;
   std::string TOSstr;
 
@@ -227,7 +229,7 @@ public:
       TripleName = "armv8-apple-ios";
       Target = GetTarget(arch, TripleName, false);
     } else if (strstr(arch, "arm64") || strstr(arch, "aarch64")) {
-      TripleName = "arm64v8.5a-apple-ios";
+      TripleName = "arm64v9.7a-apple-ios";
       Target = GetTarget(arch, TripleName, false);
     } else {
       arch = "x86-64"; // reset to x86_64 anyway
@@ -310,6 +312,7 @@ public:
     std::unique_ptr<MCCodeEmitter> MCE(
         Target->createMCCodeEmitter(*MII, *MRI, *MCCTX));
 #endif
+    CE = MCE.get();
 
 #if LLVM_VERSION_MAJOR >= 22
     IP = Target->createMCInstPrinter(Triple(TripleName), 0, *MAI, *MII, *MRI);
@@ -499,6 +502,24 @@ std::string Disassembler::assemble(const char *asmcode,
           asmcode, std::string(&opcode[1], &opcode[1] + opcode[0])));
   }
   return outs;
+}
+
+std::string Disassembler::assemble(const llvm::MCInst &inst,
+                                   unsigned char opcode[20], bool cache) {
+  DisassemblerContext *ctx = (DisassemblerContext *)m_ctx;
+
+  SmallVector<char, 16> bytes;
+  SmallVector<MCFixup, 4> fixups;
+
+  ctx->CE->encodeInstruction(inst, bytes, fixups, *ctx->STI);
+  if (bytes.empty()) {
+    opcode[0] = 0;
+    return "Failed to encode instruction";
+  }
+
+  opcode[0] = (uint8_t)bytes.size();
+  memcpy(&opcode[1], bytes.data(), bytes.size());
+  return "";
 }
 
 int Disassembler::disassemble(unsigned int mc, std::string &text,

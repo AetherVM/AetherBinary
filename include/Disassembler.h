@@ -70,6 +70,8 @@ public:
 
   std::string assemble(const char *asmcode, unsigned char opcode[20],
                        bool cache = true);
+  std::string assemble(const llvm::MCInst &inst, unsigned char opcode[20],
+                       bool cache = true);
 
 #define SIMDImm LogicalImm
   enum ImmOperandType {
