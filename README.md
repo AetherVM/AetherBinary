@@ -109,7 +109,12 @@ vcvarsall x64
 ### ICPP Build
 To build your own version, you need to have [ICPP](https://github.com/vpand/icpp), **Ninja**, **CMake** available in current terminal session. After a recursive clone of this repo, then build it in one go:
 ```sh
-/path/to/icpp build.cc
+# build for the current host
+icpp build.cc
+# build for iOS (only support on macOS)
+icpp build-ios.cc
+# build for Android (add -arch=x86_64 if targeting emulator)
+icpp build-android.cc -ndk=/path/to/ndk -icpp=/path/to/icpp-project
 ```
 After aaa... while, the package should be at: build-Release/install.
 

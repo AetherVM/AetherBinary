@@ -4,6 +4,7 @@
  * fix failing to assemble when the output is buffered;
  
 ### Improvements:
+ * add android and ios build support;
  * add cache option for assembler;
  * add attach mode for binary creation;
  * remove unused llvm command line options in assembler.
