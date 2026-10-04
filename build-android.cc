@@ -69,6 +69,8 @@ icpp::strings common_args(std::string_view ndk, std::string_view type,
 }
 
 void install_llvm(std::string_view thisdir, std::string_view installdir) {
+  std::println("Installing LLVM to {} ...", installdir);
+
   auto base_path = fs::path(thisdir);
   auto install_path = fs::path(installdir);
 
@@ -92,6 +94,17 @@ void install_llvm(std::string_view thisdir, std::string_view installdir) {
       install_path.parent_path() / "llvm/include/llvm/Config/abi-breaking.h";
   auto header_dest = install_path / "include/llvm/Config/abi-breaking.h";
   fs::copy_file(header_src, header_dest, fs::copy_options::overwrite_existing);
+
+  std::println("Copying android header files ...");
+  for (auto item :
+       {"include/llvm/Config/llvm-config.h", "include/llvm/ADT/APFloat.h",
+        "include/llvm/Support/Error.h",
+        "lib/cmake/llvm/LLVMExports-release.cmake",
+        "lib/cmake/llvm/LLVMExports.cmake"}) {
+    auto src = fs::path(thisdir) / "android" / item;
+    auto dest = install_path / item;
+    fs::copy_file(src, dest, fs::copy_options::overwrite_existing);
+  }
 }
 
 } // namespace
@@ -167,6 +180,8 @@ int main(int argc, const char *argv[]) {
   if (!fs::exists(ninja)) {
     auto args = common_args(ndk, type, arch, libcxx_build.string());
     args.push_back(std::format("-DCMAKE_PREFIX_PATH={}/install", build_llvm));
+    args.push_back(
+        std::format("-DLLVM_DIR={}/install/lib/cmake/llvm", build_llvm));
     args.push_back(std::format("-DLLVM_BUILD_DIR={}/llvm", build_llvm));
     args.push_back(
         std::format("-DCMAKE_INSTALL_PREFIX={}/install", build_aebi));
