@@ -62,8 +62,9 @@ icpp::strings common_args(std::string_view ndk, std::string_view type,
                   libcxx_dir));
   args.push_back(std::format("-DCMAKE_EXE_LINKER_FLAGS=\"{}\"", link_flags));
   args.push_back(std::format("-DCMAKE_SHARED_LINKER_FLAGS=\"{}\"", link_flags));
-  args.push_back("-DCMAKE_CXX_STANDARD_LIBRARIES=\"-Wl,-Bdynamic -lc++ "
-                 "-lc++abi -lunwind\"");
+  args.push_back(
+      "-DCMAKE_CXX_STANDARD_LIBRARIES=\"-Wl,-rpath,$$ORIGIN "
+      "-Wl,-rpath,$$ORIGIN/../lib -Wl,-Bdynamic -lc++ -lc++abi -lunwind\"");
   args.push_back("-Wno-deprecated");
   return args;
 }
